@@ -51,6 +51,8 @@ http {
             valid_statuses = {200, 302},  -- a list valid HTTP status code
         }
 
+        -- TODO
+        --[[
         -- register new type of service
         ec:reg_service {
             type = "redis",
@@ -70,8 +72,11 @@ http {
             host = "127.0.0.1",
             port = 6379        
         })
+        ]]--
 
-        ec:spwan_heartbeat()
+        ec:spwan_heartbeat {
+            interval = 20, -- run check cycle & send heartbeat every 20s
+        }
     }
 }
 ```
