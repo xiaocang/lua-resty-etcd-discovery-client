@@ -11,10 +11,8 @@ Table of Contents
 * [Synopsis](#synopsis)
 * [Description](#description)
 * [Methods](#methods)
-* [Multiple Upstreams](#multiple-upstreams)
 * [Installation](#installation)
 * [TODO](#todo)
-* [Bugs and Patches](#bugs-and-patches)
 * [Author](#author)
 * [Copyright and License](#copyright-and-license)
 * [See Also](#see-also)
@@ -32,7 +30,8 @@ http {
     lua_package_path "/path/to/lua-resty-etcd-discovery-client/lib/?.lua;;"  
 
     init_worker_by_lua {
-        local etcd_client = require "resty.etcd.discovery.client"
+        local etcd_client 
+            = require "resty.etcd.discovery.client"
 
         local etcd_server_opt = {
             { server = "10.0.1.10", port = 2379 },
@@ -41,15 +40,28 @@ http {
         }
         local ec = etcd_client.new(etcd_server_opt)
 
-        -- add new service
-        ec:add_http_service {
-            http_req = "GET / HTTP/1.0\r\nHost: foo.com\r\n\r\n",
+        local service_discovery_opt = {
+            key = "_openresty/demo_service",
+            -- maybe use cjson.encode instead
+            val = [=[ 
+            {
+                "name":"demo_service",
+                "description": "other info"
+            } 
+            ]=]
+        }
+        local http_service_opt = {
+            host = "127.0.0.1", -- http service server addr
+            port = 8080,        -- http service server port
+            http_req = "GET /monitor HTTP/1.0\r\nHost: foo.com\r\n\r\n",
                         -- raw HTTP request for checking
             timeout = 1000,   -- 1 sec is the timeout for network operations
             fall = 3,  -- # of successive failures before turning a peer down
             rise = 2,  -- # of successive successes before turning a peer up
             valid_statuses = {200, 302},  -- a list valid HTTP status code
         }
+        -- add new service
+        ec:add_http_service(service_discovery_opt, http_service_opt)
 
         -- TODO
         --[[
@@ -68,14 +80,30 @@ http {
             end
         }
 
-        ec:add_custom_service("redis", {
+        ec:add_custom_service({
+            type = "redis",
+            key = "_openresty/redis_server",
+            val = '{"name":"redis_server"}'
+        }, {
             host = "127.0.0.1",
             port = 6379        
         })
         ]]--
 
-        ec:spwan_heartbeat {
+        ec:spawn_heartbeat {
             interval = 20, -- run check cycle & send heartbeat every 20s
+        }
+
+        -- server here
+        server {
+            listen 127.0.0.1:8080;
+
+            location / {
+            }
+
+            location /monitor {
+                return 200;
+            }
         }
     }
 }
@@ -85,3 +113,5 @@ Description
 ===========
 
 This library performs etcd discovery client with healthcheck in NGINX.
+
+[Back to TOC](#table-of-contents)
