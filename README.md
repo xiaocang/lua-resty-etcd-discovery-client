@@ -27,10 +27,10 @@ Synopsis
 
 ``` nginx
 http {
-    lua_package_path "/path/to/lua-resty-etcd-discovery-client/lib/?.lua;;"  
+    lua_package_path "/path/to/lua-resty-etcd-discovery-client/lib/?.lua;;"
 
     init_worker_by_lua {
-        local etcd_client 
+        local etcd_client
             = require "resty.etcd.discovery.client"
 
         local etcd_server_opt = {
@@ -39,15 +39,19 @@ http {
             { server = "10.0.1.12", port = 2379 }
         }
         local ec = etcd_client.new(etcd_server_opt)
+        if not ec then
+            -- bind to one ngx worker only to keep data share simple
+            return
+        end
 
         local service_discovery_opt = {
             key = "_openresty/demo_service",
             -- maybe use cjson.encode instead
-            val = [=[ 
+            val = [=[
             {
                 "name":"demo_service",
                 "description": "other info"
-            } 
+            }
             ]=]
         }
         local http_service_opt = {
@@ -86,12 +90,13 @@ http {
             val = '{"name":"redis_server"}'
         }, {
             host = "127.0.0.1",
-            port = 6379        
+            port = 6379
         })
         ]]--
 
         ec:spawn_heartbeat {
             interval = 20, -- run check cycle & send heartbeat every 20s
+            concurrency = 10 -- concurrency level for test requests
         }
 
         -- server here
