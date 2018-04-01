@@ -42,3 +42,6 @@ luac.out
 # vim swap file
 .*.swp
 .*.swo
+
+# test-nginx file
+t/servroot

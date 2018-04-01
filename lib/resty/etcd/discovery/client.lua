@@ -6,8 +6,6 @@ local wait = ngx.thread.wait
 local ngx_log = ngx.log
 local ERR = ngx.ERR
 local INFO = ngx.INFO
-local w_count = ngx.worker.count
-local w_id = ngx.worker.id
 local ngx_sleep = ngx.sleep
 local timer_at = ngx.timer.at
 local encode_base64 = ngx.encode_base64
@@ -21,6 +19,9 @@ local cjson_decode = cjson.decode
 
 local _M = { _VERSION = 0.1 }
 local mt = { __index = _M }
+
+local w_count = ngx.worker.count()
+local w_id = ngx.worker.id()
 
 local CONCURRENCY         = 10 -- default concurrency for test requests
 local HTTP_TIMEOUT        = 3000 -- default http timeout option
