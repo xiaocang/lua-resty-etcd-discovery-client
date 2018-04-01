@@ -64,7 +64,7 @@ local function request_json(hc, ...)
     return res_json
 end
 
-function _M:add_service_list(opt)
+local function add_service_list(self, opt)
     local typ = opt.type
     if not typ then
         return nil, "service list error: \"type\" is required"
@@ -162,14 +162,14 @@ function _M:add_http_service(etcd_opt, service_opt)
         return nil, "status code invalid"
     end
 
-    return self:add_service_list {
+    return add_service_list(self, {
         type = "http",
         args = {
             etcd_service_key = etcd_service_key,
             etcd_service_val = etcd_service_val
         },
         handler = _handler
-    }
+    })
 end
 
 function _M.new(opt)
