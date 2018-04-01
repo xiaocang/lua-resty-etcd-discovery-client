@@ -401,9 +401,8 @@ local function _timer(premature, self, spawn_opt)
         end
     end
 
-    timer_at(spawn_interval, _timer)
+    timer_at(spawn_interval, _timer, self, spawn_opt)
 end
-
 
 function _M:spawn_heartbeat(spawn_opt)
     if not spawn_opt then
