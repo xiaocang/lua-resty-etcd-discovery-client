@@ -21,7 +21,7 @@ Table of Contents
 Status
 ======
 
-This library is still under early development but is already production ready.
+This library is still under early development do not use it in production.
 
 Synopsis
 ========
