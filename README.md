@@ -52,16 +52,21 @@ http {
                 "name":"demo_service",
                 "description": "other info"
             }
-            ]=]
+            ]=], -- etcd service info
+            fall = 3,  -- # of successive failures before turning a peer down
+            rise = 2,  -- # of successive successes before turning a peer up
         }
         local http_service_opt = {
             host = "127.0.0.1", -- http service server addr
             port = 8080,        -- http service server port
-            http_req = "GET /monitor HTTP/1.0\r\nHost: foo.com\r\n\r\n",
-                        -- raw HTTP request for checking
+            http_params = {
+                uri = "/monitor",
+                headers = {
+                    Host = "localhost",
+                    ["User-Agent"] = "Etcd discovery client v0.1"
+                }
+            }, -- resty.http `request` method params
             timeout = 1000,   -- 1 sec is the timeout for network operations
-            fall = 3,  -- # of successive failures before turning a peer down
-            rise = 2,  -- # of successive successes before turning a peer up
             valid_statuses = {200, 302},  -- a list valid HTTP status code
         }
         -- add new service
